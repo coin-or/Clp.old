@@ -108,6 +108,7 @@ ClpModel::ClpModel (bool emptyMessages) :
      specialOptions_(0),
 #ifndef CLP_NO_STD
      defaultHandler_(true),
+     defaultEventHandler_(true),
      rowNames_(),
      columnNames_(),
 #else
@@ -154,6 +155,10 @@ ClpModel::~ClpModel ()
           delete handler_;
           handler_ = NULL;
      }
+     if(defaultEventHandler_){
+          delete eventHandler_;
+          eventHandler_ = NULL;
+     }
      gutsOfDelete(0);
 }
 // Does most of deletion (0 = all, 1 = most)
@@ -199,8 +204,6 @@ ClpModel::gutsOfDelete(int type)
           integerType_ = NULL;
           delete [] status_;
           status_ = NULL;
-          delete eventHandler_;
-          eventHandler_ = NULL;
      }
      whatsChanged_ = 0;
      delete matrix_;
@@ -257,13 +260,10 @@ ClpModel::gutsOfLoadModel (int numberRows, int numberColumns,
                            const double* rowlb, const double* rowub,
                            const double * rowObjective)
 {
-     // save event handler in case already set
-     ClpEventHandler * handler = eventHandler_->clone();
      // Save specialOptions
      int saveOptions = specialOptions_;
      gutsOfDelete(0);
      specialOptions_ = saveOptions;
-     eventHandler_ = handler;
      numberRows_ = numberRows;
      numberColumns_ = numberColumns;
      rowActivity_ = new double[numberRows_];
@@ -744,13 +744,19 @@ void
 ClpModel::gutsOfCopy(const ClpModel & rhs, int trueCopy)
 {
      defaultHandler_ = rhs.defaultHandler_;
+     defaultEventHandler_ = rhs.defaultEventHandler_;
      randomNumberGenerator_ = rhs.randomNumberGenerator_;
      if (trueCopy >= 0) {
           if (defaultHandler_)
                handler_ = new CoinMessageHandler(*rhs.handler_);
           else
                handler_ = rhs.handler_;
-          eventHandler_ = rhs.eventHandler_->clone();
+
+          if(defaultEventHandler_)
+               eventHandler_ = rhs.eventHandler_->clone();
+          else
+               eventHandler_ = rhs.eventHandler_;
+
           messages_ = rhs.messages_;
           coinMessages_ = rhs.coinMessages_;
      } else {
@@ -3331,7 +3337,12 @@ ClpModel::ClpModel ( const ClpModel * rhs,
           handler_ = new CoinMessageHandler(*rhs->handler_);
      else
           handler_ = rhs->handler_;
-     eventHandler_ = rhs->eventHandler_->clone();
+
+     if(defaultEventHandler_)
+          eventHandler_ = rhs->eventHandler_->clone();
+     else
+          eventHandler_ = rhs->eventHandler_;
+
      randomNumberGenerator_ = rhs->randomNumberGenerator_;
      messages_ = rhs->messages_;
      coinMessages_ = rhs->coinMessages_;
@@ -3968,10 +3979,11 @@ ClpModel::deleteNamesAsChar(const char * const * names, int number) const
 #endif
 // Pass in Event handler (cloned and deleted at end)
 void
-ClpModel::passInEventHandler(const ClpEventHandler * eventHandler)
+ClpModel::passInEventHandler(ClpEventHandler * eventHandler)
 {
      delete eventHandler_;
-     eventHandler_ = eventHandler->clone();
+     eventHandler_ = eventHandler;
+     defaultEventHandler_=false;
 }
 // Sets or unsets scaling, 0 -off, 1 on, 2 dynamic(later)
 void

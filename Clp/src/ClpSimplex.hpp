@@ -281,7 +281,7 @@ public:
      void borrowModel(ClpModel & otherModel);
      void borrowModel(ClpSimplex & otherModel);
      /// Pass in Event handler (cloned and deleted at end)
-     void passInEventHandler(const ClpEventHandler * eventHandler);
+     void passInEventHandler(ClpEventHandler * eventHandler);
      /// Puts solution back into small model
      void getbackSolution(const ClpSimplex & smallModel, const int * whichRow, const int * whichColumn);
      /** Load nonlinear part of problem from AMPL info

@@ -882,7 +882,7 @@ public:
           return defaultHandler_;
      }
      /// Pass in Event handler (cloned and deleted at end)
-     void passInEventHandler(const ClpEventHandler * eventHandler);
+     void passInEventHandler(ClpEventHandler * eventHandler);
      /// Event handler
      inline ClpEventHandler * eventHandler() const {
           return eventHandler_;
@@ -1229,6 +1229,8 @@ protected:
      CoinMessageHandler * handler_;
      /// Flag to say if default handler (so delete)
      bool defaultHandler_;
+     /// Flag to say if default event handler (so delete)
+     bool defaultEventHandler_;
      /// Thread specific random number generator
      CoinThreadRandom randomNumberGenerator_;
      /// Event handler

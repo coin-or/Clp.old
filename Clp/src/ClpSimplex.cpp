@@ -7085,10 +7085,7 @@ ClpSimplex::restoreModel(const char * fileName)
      FILE * fp = fopen(fileName, "rb");
      if (fp) {
           // Get rid of current model
-          // save event handler in case already set
-          ClpEventHandler * handler = eventHandler_->clone();
           ClpModel::gutsOfDelete(0);
-          eventHandler_ = handler;
           gutsOfDelete(0);
           int i;
           for (i = 0; i < 6; i++) {
@@ -9797,10 +9794,11 @@ ClpSimplex::originalModel(ClpSimplex * miniModel)
 }
 // Pass in Event handler (cloned and deleted at end)
 void
-ClpSimplex::passInEventHandler(const ClpEventHandler * eventHandler)
+ClpSimplex::passInEventHandler(ClpEventHandler * eventHandler)
 {
      delete eventHandler_;
-     eventHandler_ = eventHandler->clone();
+     eventHandler_ = eventHandler;
+     defaultEventHandler_ = false;
      eventHandler_->setSimplex(this);
 }
 #ifndef NDEBUG
